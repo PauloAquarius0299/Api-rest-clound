@@ -29,4 +29,10 @@ public class inMemoryUserRepository implements UserRepository {
     public void deleteUserByID(UUID id) {
         this.users.removeIf(user -> id.equals(user.getId()));
     }
+
+    public User save(User user) {
+        this.users.removeIf(u -> user.getId().equals(u.getId()));
+        this.users.add(user);
+        return user;
+    }
 }

@@ -2,17 +2,14 @@ package com.paulotech.apirestzero.service.impl;
 
 import com.paulotech.apirestzero.domain.User;
 import com.paulotech.apirestzero.repository.UserRepository;
-import com.paulotech.apirestzero.service.UserService;
 import com.paulotech.apirestzero.service.dto.CreateUserCommand;
 import com.paulotech.apirestzero.service.exceptions.EmailAlreadyExistsException;
 import com.paulotech.apirestzero.service.exceptions.UserNotFoundException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -25,73 +22,50 @@ import static org.mockito.Mockito.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserServiceImplTest {
     private UserServiceImpl userServiceImpl;
+
     @Mock private UserRepository userRepository;
     @Mock private PasswordEncoder encoder;
 
-    @Mock
-    private UserService service;
-
-
-    @BeforeAll
-    void setUp(){
+    @BeforeEach
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         userServiceImpl = new UserServiceImpl(userRepository, encoder);
     }
 
-    @BeforeEach
-    void setUpEach(){
-        reset(this.encoder, this.userRepository);
-    }
-
     @Test
-    void itShouldCreateTheUserIfEmailIsAvailable(){
-
+    void itShouldCreateTheUserIfEmailIsAvailable() {
         var command = new CreateUserCommand("Fulano", "fulano@12.com", "senha1234");
 
-        when(this.encoder.encode(command.password())).thenReturn("senha1234");
-
-        when(this.userRepository.findByEmail(command.email())).thenReturn(Optional.empty());
-
-        when(this.userRepository.createUser(any(User.class)))
-                .thenAnswer(invocation -> {
-                    var user = invocation.getArgument(0, User.class);
-                    return user;
-                });
+        when(encoder.encode(command.password())).thenReturn("senha1234");
+        when(userRepository.findByEmail(command.email())).thenReturn(Optional.empty());
+        when(userRepository.createUser(any(User.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0, User.class));
 
         var userID = userServiceImpl.createUser(command);
 
         assertNotNull(userID);
-        verify(this.encoder, times(1)).encode(command.password());
-        verify(this.userRepository, times(1)).findByEmail(command.email());
+        verify(encoder, times(1)).encode(command.password());
+        verify(userRepository, times(1)).findByEmail(command.email());
 
         var captor = ArgumentCaptor.forClass(User.class);
-
-        verify(this.userRepository, times(1)).createUser(captor.capture());
-
-        verify(this.userRepository, times(1)).createUser(any(User.class));
+        verify(userRepository, times(1)).createUser(captor.capture());
 
         var createdUser = captor.getValue();
-        assertEquals(createdUser.getPassword(), "encoderPassword");
-        assertEquals(createdUser.getId(), userID);
-
+        assertEquals("senha1234", createdUser.getPassword());
+        assertEquals(userID, createdUser.getId());
     }
 
     @Test
-    void itShouldThrowAnExceptionIfEmailIsNotAvailable(){
+    void itShouldThrowAnExceptionIfEmailIsNotAvailable() {
         var command = new CreateUserCommand("Fulano", "fulano@12.com", "senha1234");
 
-        when(this.userRepository.findByEmail(command.email())).thenReturn(Optional.of(User.builder().build()));
+        when(userRepository.findByEmail(command.email())).thenReturn(Optional.of(User.builder().build()));
 
-        assertThrows(EmailAlreadyExistsException.class, () -> service.createUser(command));
+        assertThrows(EmailAlreadyExistsException.class, () -> userServiceImpl.createUser(command));
 
-        verify(this.encoder, times(0)).encode(any());
-
-        verify(this.userRepository, times(1)).findByEmail(command.email());
-
-        verify(this.userRepository, times(0)).createUser(any());
-
-        verify(this.userRepository, times(1)).createUser(any(User.class));
-
+        verify(encoder, times(0)).encode(any());
+        verify(userRepository, times(1)).findByEmail(command.email());
+        verify(userRepository, times(0)).createUser(any());
     }
 
     @Test
@@ -105,37 +79,80 @@ public class UserServiceImplTest {
                 .password("senha1234")
                 .build();
 
-        when(this.userRepository.findById(uuid)).thenReturn(Optional.of(user));
+        when(userRepository.findById(uuid)).thenReturn(Optional.of(user));
 
-        var userDTO = this.service.getUserById(uuid);
+        var userDTO = userServiceImpl.getUserById(uuid);
 
-        assertEquals(userDTO.id(), user.getId());
-        assertEquals(userDTO.name(), user.getName());
-        assertEquals(userDTO.email(), user.getEmail());
-        assertEquals(userDTO.createdAt(), user.getCreatedAt());
-        assertEquals(userDTO.updatedAt(), user.getUpdatedAt());
+        assertEquals(user.getId(), userDTO.id());
+        assertEquals(user.getName(), userDTO.name());
+        assertEquals(user.getEmail(), userDTO.email());
+        assertEquals(user.getCreatedAt(), userDTO.createdAt());
+        assertEquals(user.getUpdatedAt(), userDTO.updatedAt());
 
-        verify(this.userRepository, times(1)).findById(uuid);
+        verify(userRepository, times(1)).findById(uuid);
     }
 
     @Test
-    void itShouldReturnAnExceptionWhenUserDoesnotExist() {
+    void itShouldReturnAnExceptionWhenUserDoesNotExist() {
         var uuid = UUID.randomUUID();
 
-        when(this.userRepository.findById(uuid)).thenReturn(Optional.empty());
+        when(userRepository.findById(uuid)).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> service.getUserById(uuid));
+        assertThrows(UserNotFoundException.class, () -> userServiceImpl.getUserById(uuid));
 
+        verify(userRepository, times(1)).findById(uuid);
     }
 
     @Test
     void itShouldDeleteUserById() {
         var uuid = UUID.randomUUID();
 
-        doNothing().when(this.userRepository).deleteUserByID(uuid);
+        doNothing().when(userRepository).deleteUserByID(uuid);
 
-        this.service.deleteUserById(uuid);
+        userServiceImpl.deleteUserById(uuid);
 
-        verify(this.userRepository, times(1)).deleteUserByID(uuid);
+        verify(userRepository, times(1)).deleteUserByID(uuid);
+    }
+
+    @Test
+    void itShouldUpdateUserById(){
+        var uuid = UUID.randomUUID();
+        var password = "senha1234";
+
+        var user = User.builder()
+                .id(uuid)
+                .name("Fulano")
+                .email("fulano@12.com")
+                .password("senha1234")
+                .build();
+
+        when(userRepository.findById(uuid)).thenReturn(Optional.of(user));
+        when(encoder.encode(password)).thenReturn("senha1234");
+        when(userRepository.save(any(User.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0, User.class));
+
+        userServiceImpl.updateUser(uuid, password);
+
+        verify(userRepository, times(1)).findById(uuid);
+        verify(encoder, times(1)).encode(password);
+
+        var captor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository, times(1)).save(captor.capture());
+
+        var updatedUser = captor.getValue();
+        assertEquals(updatedUser.getPassword(), "senha1234");
+    }
+
+    @Test
+    void itShouldThrowAnErrorIfUserDoesNotExistWhenUpdating(){
+        var uuid = UUID.randomUUID();
+        var password = "senha1234";
+
+        when(userRepository.findById(uuid)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userServiceImpl.updateUser(uuid, password));
+
+        verify(userRepository, times(1)).findById(uuid);
+        verify(userRepository, times(0)).save(any());
     }
 }

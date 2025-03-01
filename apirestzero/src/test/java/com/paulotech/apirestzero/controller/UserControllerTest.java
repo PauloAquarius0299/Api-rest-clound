@@ -1,6 +1,7 @@
 package com.paulotech.apirestzero.controller;
 
 import com.paulotech.apirestzero.controller.dto.CreateUserRequestDTO;
+import com.paulotech.apirestzero.controller.dto.UpdateUserRequestDTO;
 import com.paulotech.apirestzero.controller.dto.UserDTO;
 import com.paulotech.apirestzero.service.UserService;
 import com.paulotech.apirestzero.service.dto.CreateUserCommand;
@@ -101,5 +102,16 @@ public class UserControllerTest {
 
         verify(this.userService, times(1))
                 .deleteUserById(uuid);
+    }
+
+    @Test
+    void itShouldUpdateUserByID(){
+        var uuid = UUID.randomUUID();
+        var request = new UpdateUserRequestDTO("senha12345");
+
+        this.userController.updateUser(uuid, request);
+
+        verify(this.userService, times(1))
+                .updateUserPassword(uuid, "senha12345");
     }
 }

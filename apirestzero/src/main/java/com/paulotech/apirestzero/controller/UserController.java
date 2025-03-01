@@ -3,6 +3,7 @@ package com.paulotech.apirestzero.controller;
 import com.paulotech.apirestzero.controller.dto.CreateUserRequestDTO;
 import com.paulotech.apirestzero.controller.dto.CreateUserResponseDTO;
 import com.paulotech.apirestzero.controller.dto.GetUserByIDRequestDTO;
+import com.paulotech.apirestzero.controller.dto.UpdateUserRequestDTO;
 import com.paulotech.apirestzero.service.UserService;
 import com.paulotech.apirestzero.service.dto.CreateUserCommand;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,6 +62,13 @@ public class UserController {
             @PathVariable UUID id
     ){
         this.userService.deleteUserById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateUser(@PathVariable UUID id,
+                                           @Valid @RequestBody UpdateUserRequestDTO updateUserRequest){
+        this.userService.updateUserPassword(id, updateUserRequest.password());
         return ResponseEntity.noContent().build();
     }
 }

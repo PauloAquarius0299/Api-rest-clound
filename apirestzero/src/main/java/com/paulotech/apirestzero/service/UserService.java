@@ -9,4 +9,5 @@ public interface UserService {
     UUID createUser(CreateUserCommand command);
     UserDTO getUserById(UUID id);
     void deleteUserById(UUID id);
+    void updateUserPassword(UUID id, String password);
 }

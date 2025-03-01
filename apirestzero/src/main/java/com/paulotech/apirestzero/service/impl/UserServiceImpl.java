@@ -56,4 +56,25 @@ public class UserServiceImpl implements UserService {
     public void deleteUserById(UUID id) {
         this.userRepository.deleteUserByID(id);
     }
+
+    @Override
+    public void updateUserPassword(UUID id, String password) {
+        var user = this.userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException());
+
+        var passwordEncoded = encoder.encode(password);
+
+        user.setPassword(passwordEncoded);
+        this.userRepository.save(user);
+    }
+
+//    public void updateUser(UUID id, String password){
+//        var user = this.userRepository.findById(id)
+//                .orElseThrow(() -> new UserNotFoundException());
+//
+//        var passwordEncoded = encoder.encode(password);
+//
+//        user.setPassword(passwordEncoded);
+//        this.userRepository.save(user);
+//    }
 }

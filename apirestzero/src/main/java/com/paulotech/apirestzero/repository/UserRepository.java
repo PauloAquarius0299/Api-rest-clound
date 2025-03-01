@@ -10,4 +10,5 @@ public interface UserRepository {
     Optional<User> findById(UUID id);
     User createUser(User user);
     void deleteUserByID(UUID id);
+    User save(User user);
 }
