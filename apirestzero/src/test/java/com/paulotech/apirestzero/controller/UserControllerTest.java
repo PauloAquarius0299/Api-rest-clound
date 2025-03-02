@@ -13,8 +13,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -113,5 +118,24 @@ public class UserControllerTest {
 
         verify(this.userService, times(1))
                 .updateUserPassword(uuid, "senha12345");
+    }
+
+    @Test
+    void itShouldReturnAuthenticatedUser() {
+        var userDTO = new UserDTO(
+                UUID.randomUUID(),
+                "fulano",
+                "XXXXXXXXXXXXX",
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+
+        var authToken = new UsernamePasswordAuthenticationToken(
+                userDTO,
+                null,
+                Collections.emptyList()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 }

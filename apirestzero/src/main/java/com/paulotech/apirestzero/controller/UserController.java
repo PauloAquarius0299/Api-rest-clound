@@ -1,9 +1,6 @@
 package com.paulotech.apirestzero.controller;
 
-import com.paulotech.apirestzero.controller.dto.CreateUserRequestDTO;
-import com.paulotech.apirestzero.controller.dto.CreateUserResponseDTO;
-import com.paulotech.apirestzero.controller.dto.GetUserByIDRequestDTO;
-import com.paulotech.apirestzero.controller.dto.UpdateUserRequestDTO;
+import com.paulotech.apirestzero.controller.dto.*;
 import com.paulotech.apirestzero.service.UserService;
 import com.paulotech.apirestzero.service.dto.CreateUserCommand;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,6 +51,20 @@ public class UserController {
                 user.email(),
                 user.createdAt().toString(),
                 user.updatedAt().toString()
+        );
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<GetUserByIDRequestDTO> getAuthenticatedUser(){
+        var userDTO = (UserDTO) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        var response = new GetUserByIDRequestDTO(
+                userDTO.id(),
+                userDTO.name(),
+                userDTO.email(),
+                userDTO.createdAt().toString(),
+                userDTO.updatedAt().toString()
         );
         return ResponseEntity.ok(response);
     }
