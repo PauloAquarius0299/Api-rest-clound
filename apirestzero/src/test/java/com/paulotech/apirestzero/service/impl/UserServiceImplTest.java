@@ -131,7 +131,7 @@ public class UserServiceImplTest {
         when(userRepository.save(any(User.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0, User.class));
 
-        userServiceImpl.updateUser(uuid, password);
+        userServiceImpl.updateUserPassword(uuid, password);
 
         verify(userRepository, times(1)).findById(uuid);
         verify(encoder, times(1)).encode(password);
@@ -150,7 +150,7 @@ public class UserServiceImplTest {
 
         when(userRepository.findById(uuid)).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> userServiceImpl.updateUser(uuid, password));
+        assertThrows(UserNotFoundException.class, () -> userServiceImpl.updateUserPassword(uuid, password));
 
         verify(userRepository, times(1)).findById(uuid);
         verify(userRepository, times(0)).save(any());
