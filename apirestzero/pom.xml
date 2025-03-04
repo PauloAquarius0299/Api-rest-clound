@@ -98,6 +98,7 @@
 	</dependencies>
 	<build>
 		<plugins>
+			<!-- Plugin para o compilador Maven com suporte ao Lombok -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -106,10 +107,40 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
+							<version>1.18.32</version> <!-- Adicione a versão do Lombok -->
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
+
+			<!-- Plugin do JaCoCo para cobertura de código -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<execution>
+						<id>jacoco-initialize</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>jacoco-site</id>
+						<phase>package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<excludes>
+								<exclude>**/config/**</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Plugin do Spring Boot para empacotamento e execução -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
