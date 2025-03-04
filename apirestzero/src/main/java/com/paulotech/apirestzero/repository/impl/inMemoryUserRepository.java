@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Repository
+//@Repository
 public class inMemoryUserRepository implements UserRepository {
     private final List<User> users = new ArrayList();
 
